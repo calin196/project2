@@ -3,6 +3,7 @@ package com.calin.todo;
 import com.calin.todo.ui.MainView;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class App extends Application {
@@ -13,6 +14,11 @@ public class App extends Application {
 
         var root = new MainView();
         var scene = new Scene(root, 1100, 700);
+
+        // ✅ Window icon
+        stage.getIcons().add(
+                new Image(getClass().getResourceAsStream("/app_icon.png"))
+        );
 
         stage.setScene(scene);
         stage.show();
