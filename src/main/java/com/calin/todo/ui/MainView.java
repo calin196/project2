@@ -160,3 +160,6 @@ public class MainView extends StackPane {
         );
     }
 }
+
+
+// check check tot norm 
