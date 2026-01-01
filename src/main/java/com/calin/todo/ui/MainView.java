@@ -16,7 +16,6 @@ import java.io.InputStream;
 
 public class MainView extends StackPane {
 
-    // ---- CHANGE NOTHING HERE ----
     private static final String[] OCEAN_CANDIDATES = {
             "/project2_ocean.jpg", "/project2_ocean.jpeg", "/project2_ocean.png",
             "/project2ocean.jpg",  "/project2ocean.jpeg",  "/project2ocean.png"
@@ -30,7 +29,7 @@ public class MainView extends StackPane {
     public MainView() {
 
         // =========================
-        // Background
+        // BACKGROUND (LOAD ONCE)
         // =========================
         ImageView bg = new ImageView(loadFirstExisting(OCEAN_CANDIDATES));
         bg.setPreserveRatio(false);
@@ -38,7 +37,7 @@ public class MainView extends StackPane {
         bg.fitHeightProperty().bind(heightProperty());
 
         // =========================
-        // Overlay
+        // OVERLAY
         // =========================
         Region overlay = new Region();
         overlay.setBackground(new Background(new BackgroundFill(
@@ -55,31 +54,39 @@ public class MainView extends StackPane {
         overlay.prefHeightProperty().bind(heightProperty());
 
         // =========================
-        // Layout
+        // CONTENT
         // =========================
+        StackPane content = createHomeContent();
+
+        // ORDER MATTERS
+        getChildren().addAll(bg, overlay, content);
+
+        // navigator controls ONLY content (index 2)
+        ViewNavigator.init(this);
+    }
+
+    private StackPane createHomeContent() {
+
         HBox content = new HBox(50);
         content.setAlignment(Pos.CENTER);
         content.setPadding(new Insets(40));
 
         // =========================
-        // LOGO — PURE WHITE, NO GLOW
+        // LOGO
         // =========================
-        Image logoImage = loadFirstExisting(LOGO_CANDIDATES);
-        ImageView logo = new ImageView(logoImage);
+        ImageView logo = new ImageView(loadFirstExisting(LOGO_CANDIDATES));
         logo.setPreserveRatio(true);
         logo.setFitWidth(580);
 
-        // FORCE LOGO TO WHITE
-        ColorAdjust forceWhite = new ColorAdjust();
-        forceWhite.setSaturation(-1.0); // remove all color
-        forceWhite.setBrightness(1.0);  // push to white
-        forceWhite.setContrast(0.2);
-
-        logo.setEffect(forceWhite);
-        logo.setSmooth(false); // prevents blue bleed
+        ColorAdjust white = new ColorAdjust();
+        white.setSaturation(-1);
+        white.setBrightness(1);
+        white.setContrast(0.2);
+        logo.setEffect(white);
+        logo.setSmooth(false);
 
         // =========================
-        // Text
+        // TEXT
         // =========================
         VBox textBox = new VBox(18);
         textBox.setAlignment(Pos.CENTER_LEFT);
@@ -96,52 +103,52 @@ public class MainView extends StackPane {
         subtitle.setTextFill(Color.color(1, 1, 1, 0.92));
 
         // =========================
-        // Button
+        // BUTTON (FIXED STYLE)
         // =========================
         Button startBtn = new Button("Let's begin");
         startBtn.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         startBtn.setMinWidth(260);
+        startBtn.setFocusTraversable(false);
 
-        final String normalStyle =
+        String normal =
                 "-fx-background-color: transparent;" +
                 "-fx-border-color: white;" +
-                "-fx-border-width: 2;" +
+                "-fx-border-width: 2px;" +
                 "-fx-text-fill: white;" +
                 "-fx-padding: 14 46;" +
-                "-fx-background-radius: 30;" +
-                "-fx-border-radius: 30;";
+                "-fx-background-radius: 30px;" +
+                "-fx-border-radius: 30px;" +
+                "-fx-cursor: hand;";
 
-        final String hoverStyle =
+        String hover =
                 "-fx-background-color: rgba(255,255,255,0.18);" +
                 "-fx-border-color: white;" +
-                "-fx-border-width: 2;" +
+                "-fx-border-width: 2px;" +
                 "-fx-text-fill: white;" +
                 "-fx-padding: 14 46;" +
-                "-fx-background-radius: 30;" +
-                "-fx-border-radius: 30;";
+                "-fx-background-radius: 30px;" +
+                "-fx-border-radius: 30px;" +
+                "-fx-cursor: hand;";
 
-        startBtn.setStyle(normalStyle);
-        startBtn.setOnMouseEntered(e -> startBtn.setStyle(hoverStyle));
-        startBtn.setOnMouseExited(e -> startBtn.setStyle(normalStyle));
+        startBtn.setStyle(normal);
+        startBtn.setOnMouseEntered(e -> startBtn.setStyle(hover));
+        startBtn.setOnMouseExited(e -> startBtn.setStyle(normal));
+
+        startBtn.setOnAction(e ->
+                ViewNavigator.switchView(new SecondView())
+        );
 
         textBox.getChildren().addAll(title, subtitle, startBtn);
         content.getChildren().addAll(logo, textBox);
 
-        getChildren().addAll(bg, overlay, content);
+        return new StackPane(content);
     }
 
-    // =========================
-    // Resource loader
-    // =========================
     private Image loadFirstExisting(String[] candidates) {
         for (String path : candidates) {
             InputStream is = getClass().getResourceAsStream(path);
-            if (is != null) {
-                return new Image(is);
-            }
+            if (is != null) return new Image(is);
         }
-        throw new RuntimeException(
-                "Could not find resource image. Tried: " + String.join(", ", candidates)
-        );
+        throw new RuntimeException("Image not found");
     }
 }
