@@ -152,3 +152,4 @@ public class MainView extends StackPane {
         throw new RuntimeException("Image not found");
     }
 }
+// tot norm doar check 
